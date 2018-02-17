@@ -1,0 +1,68 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven { url 'https://plugins.gradle.org/m2/' }
+    }
+}
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '1.2.4'
+    id 'com.bmuschko.clover' version '2.2.0'
+}
+
+group 'com.archeinteractive.minecraft'
+version '1.0.0-SNAPSHOT'
+
+apply from: 'gradle/util.gradle'
+apply from: scriptFile('env.gradle')
+apply from: scriptFile('deps.gradle')
+
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+configureJavaCompilers(8)
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [configurations.shadow]
+    }
+}
+
+tasks.build.dependsOn(shadowJar)
+artifacts.archives shadowJar
+
+tasks.withType(AbstractCompile) {
+    classpath += configurations.shadow
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/groups/public/' }
+}
+
+dependencies {
+    compile deps.json
+    compile deps.netty
+
+    testCompile deps.junit
+    testCompile deps.mockito
+    testCompile deps.powermockMockito
+    testCompile deps.powermockJUnit4
+    testCompile deps.assertj
+
+    clover deps.clover
+}
+
+clover {
+    testIncludes = ['**/*Test.java']
+
+    report {
+        html = true
+        pdf = true
+    }
+}
