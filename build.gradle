@@ -7,36 +7,23 @@ buildscript {
 }
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '1.2.4'
-    id 'com.bmuschko.clover' version '2.2.0'
+    id 'java'
+    id 'maven'
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
 }
 
 group 'com.archeinteractive.minecraft'
 version '1.0.0-SNAPSHOT'
 
-apply from: 'gradle/util.gradle'
-apply from: scriptFile('env.gradle')
-apply from: scriptFile('deps.gradle')
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'com.github.johnrengelman.shadow'
-
-configureJavaCompilers(8)
-
-idea {
-    module {
-        scopes.PROVIDED.plus += [configurations.shadow]
+jar {
+    manifest {
+        attributes (
+                'Main-Class': 'com.archeinteractive.minecraft.vote_tester.Main'
+        )
     }
-}
-
-tasks.build.dependsOn(shadowJar)
-artifacts.archives shadowJar
-
-tasks.withType(AbstractCompile) {
-    classpath += configurations.shadow
 }
 
 repositories {
@@ -46,23 +33,11 @@ repositories {
 }
 
 dependencies {
-    compile deps.json
-    compile deps.netty
-
-    testCompile deps.junit
-    testCompile deps.mockito
-    testCompile deps.powermockMockito
-    testCompile deps.powermockJUnit4
-    testCompile deps.assertj
-
-    clover deps.clover
+    compile 'org.json:json:20180130'
+    compile 'io.netty:netty-all:4.1.21.Final'
 }
 
-clover {
-    testIncludes = ['**/*Test.java']
-
-    report {
-        html = true
-        pdf = true
-    }
+wrapper {
+    gradleVersion = '5.5.1'
+    distributionType = Wrapper.DistributionType.ALL
 }
